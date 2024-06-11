@@ -4,7 +4,6 @@ import axios from 'axios'
 import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
 
-// Set Axios to include CSRF token from meta tag
 const { data } = await api.get('/auth/csrf-token')
 
 window.Pusher = Pusher
@@ -17,26 +16,20 @@ window.Echo = new Echo({
   wssPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
   forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
   enabledTransports: ['ws', 'wss'],
-  // authEndpoint: `${import.meta.env.VITE_LARAVEL_URL}/broadcasting/auth`,
   auth: {
     headers: {
       'X-CSRF-TOKEN': data.csrf_token
     }
   },
-  authorizer: (channel, options) => {
+  authorizer: (channel: any) => {
     return {
-      authorize: (socketId, callback) => {
+      authorize: (socketId: string, callback: (...args: any) => void) => {
         axios
           .post(
             `${import.meta.env.VITE_LARAVEL_URL}/broadcasting/auth`,
+            { socket_id: socketId, channel_name: channel.name },
             {
-              socket_id: socketId,
-              channel_name: channel.name
-            },
-            {
-              headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-              },
+              headers: { 'X-Requested-With': 'XMLHttpRequest' },
               withCredentials: true,
               withXSRFToken: true
             }

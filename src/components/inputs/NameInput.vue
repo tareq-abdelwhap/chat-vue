@@ -24,9 +24,7 @@ const errorMessage = computed(() => {
   if (props.errors) return props.errors.join(', ')
   return 'Invalid name'
 })
-watch(props, () => {
-  nameError.value = !!props.errors
-})
+watch(props, () => (nameError.value = !!props.errors))
 </script>
 
 <template>

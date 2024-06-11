@@ -40,9 +40,7 @@ const errorMessage = computed(() => {
   if (props.errors) return props.errors.join(', ')
   return 'Password must be at least 8 characters long'
 })
-watch(props, () => {
-  passwordError.value = !!props.errors
-})
+watch(props, () => (passwordError.value = !!props.errors))
 </script>
 
 <template>

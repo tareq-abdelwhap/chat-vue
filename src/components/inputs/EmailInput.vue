@@ -24,9 +24,7 @@ const errorMessage = computed(() => {
   if (props.errors) return props.errors.join(', ')
   return 'Invalid email'
 })
-watch(props, () => {
-  emailError.value = !!props.errors
-})
+watch(props, () => (emailError.value = !!props.errors))
 </script>
 
 <template>

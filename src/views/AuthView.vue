@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import LoginForm from '@/components/LoginForm.vue'
 import RegisterForm from '@/components/RegisterForm.vue'
+import { ref } from 'vue'
 
 const register = ref(false)
 </script>

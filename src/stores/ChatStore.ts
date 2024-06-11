@@ -2,6 +2,7 @@ import api from '@/utils/api'
 import { defineStore, storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from './AuthStore'
+import { useEchoStore } from './EchoStore'
 
 interface User {
   id?: number
@@ -31,7 +32,6 @@ export const useChatStore = defineStore('chat', () => {
       loading.value = true
       const { data } = await api.get('/users')
       users.value = data.users
-      return data
     } catch (e) {
       users.value = []
     } finally {
@@ -69,34 +69,6 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  const timeOut: {} = {}
-  const listenToMessages = async (user) => {
-    const { user: authUser } = storeToRefs(authStore)
-    Echo.join(`chat.${user.id}`)
-      .listen('MessageSent', (res) => {
-        selectedChat.value.messages?.push(res.message)
-      })
-      .listenForWhisper('typing', (res) => {
-        users.value.map((u) => {
-          if (u.id === res.user.id) {
-            u.typing = true
-            authUser.value.typing = true
-            if (timeOut[u.id]) clearTimeout(timeOut[u.id])
-            timeOut[u.id] = setTimeout(() => {
-              u.typing = false
-              authUser.value.typing = false
-            }, 1500)
-          }
-        })
-      })
-  }
-
-  const markUsersAsOnline = (users: number[], online: boolean = true, force = false) => {
-    if (force) onlineUsers.value = users
-    else if (online) onlineUsers.value = [...onlineUsers.value, ...users]
-    else onlineUsers.value = onlineUsers.value.filter((u) => !users.includes(u))
-  }
-
   return {
     users,
     loading,
@@ -105,8 +77,6 @@ export const useChatStore = defineStore('chat', () => {
 
     getUsers,
     selectUser,
-    sendMessage,
-    listenToMessages,
-    markUsersAsOnline
+    sendMessage
   }
 })

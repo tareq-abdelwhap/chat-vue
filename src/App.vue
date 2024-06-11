@@ -1,25 +1,8 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-import { useAuthStore } from './stores/AuthStore'
-import { useChatStore } from './stores/ChatStore'
+import { useEchoStore } from '@/stores/EchoStore'
+import { onMounted } from 'vue'
 
-const authStore = useAuthStore()
-const { user } = storeToRefs(authStore)
-
-if (user.value) {
-  const chatStore = useChatStore()
-  Echo.join('online-status')
-    .here((users: Object[][]) => {
-      chatStore.markUsersAsOnline(users.map((u) => u.id))
-    })
-    .joining((user) => {
-      chatStore.markUsersAsOnline([user.id])
-    })
-    .leaving((user) => {
-      chatStore.markUsersAsOnline([user.id], false)
-    })
-    .listen('UserOnlineStatus', (e) => {})
-}
+onMounted(() => useEchoStore().onlineStatus())
 </script>
 
 <template>
