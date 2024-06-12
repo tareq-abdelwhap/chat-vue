@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import NameInput from '@/components/inputs/NameInput.vue'
 import EmailInput from '@/components/inputs/EmailInput.vue'
 import PasswordInput from '@/components/inputs/PasswordInput.vue'
-import Loading from '@/components/icons/Loading.vue'
+import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
@@ -44,7 +44,7 @@ const handleRegister = async () => {
       :disabled="loading"
       :class="{ 'opacity-50': loading }"
     >
-      <loading v-if="loading" color="text-white" />
+      <loading-icon v-if="loading" color="text-white" />
       <span v-else>SIGN UP</span>
     </button>
     <button

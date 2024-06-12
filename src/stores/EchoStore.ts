@@ -11,6 +11,7 @@ export const useEchoStore = defineStore('echo', () => {
 
   const onlineStatus = () => {
     const { user } = storeToRefs(authStore)
+    const { users } = storeToRefs(chatStore)
 
     if (user.value) {
       Echo.join('online-status')
@@ -23,7 +24,18 @@ export const useEchoStore = defineStore('echo', () => {
         .leaving((user) => {
           markUsersAsOnline([user.id], false)
         })
-        .listen('UserOnlineStatus', (e) => {})
+        .listen('UserOnlineStatus', () => {})
+        .listenForWhisper('typing', (res: any) => {
+          users.value.map((u) => {
+            if (u.id === res.user.id) {
+              user.value.typing = u.typing = true
+              if (timeOut.value[u.id]) clearTimeout(timeOut.value[u.id])
+              timeOut.value[u.id] = setTimeout(() => {
+                user.value.typing = u.typing = false
+              }, 900)
+            }
+          })
+        })
     }
   }
 
@@ -37,32 +49,17 @@ export const useEchoStore = defineStore('echo', () => {
 
   const listenToMessages = async () => {
     const { user } = storeToRefs(authStore)
-    const { users, selectedChat } = storeToRefs(chatStore)
+    const { selectedChat } = storeToRefs(chatStore)
 
-    Echo.private(`chat.${user.value.id}`)
-      .listen('ChatEvent', (res) => {
-        selectedChat.value.messages?.push(res.message)
-      })
-      .listenForWhisper('typing', (res) => {
-        users.value.map((u) => {
-          if (u.id === res.user.id) {
-            user.value.typing = u.typing = true
-            // user.value.typing = true
-            if (timeOut.value[u.id]) clearTimeout(timeOut.value[u.id])
-            timeOut.value[u.id] = setTimeout(() => {
-              user.value.typing = u.typing = false
-              //   user.value.typing = false
-            }, 1500)
-          }
-        })
-      })
+    Echo.private(`chat.${user.value?.id}`).listen('ChatEvent', (res) => {
+      selectedChat.value.messages?.push(res.message)
+    })
   }
 
   const whisper = () => {
     const { user } = storeToRefs(authStore)
-    const { selectedChat } = storeToRefs(chatStore)
 
-    const channel = Echo.private(`chat.${selectedChat.value.user?.id}`)
+    const channel = Echo.join(`online-status`)
     setTimeout(function () {
       channel.whisper('typing', {
         user: user.value,

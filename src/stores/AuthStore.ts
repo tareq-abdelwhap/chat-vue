@@ -7,6 +7,9 @@ interface User {
   id?: number
   name?: string
   email: string
+  selected?: boolean
+  typing?: boolean
+  online?: boolean
 }
 
 export const useAuthStore = defineStore('auth', () => {

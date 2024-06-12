@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import TypingIndicator from '@/components/TypingIndicator.vue'
-import Loading from '@/components/icons/Loading.vue'
+import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import { storeToRefs } from 'pinia'
 import { onMounted } from 'vue'
 
@@ -22,7 +22,7 @@ onMounted(async () => await chatStore.getUsers())
   >
     <div class="text-center text-xl border-b-2 pb-3">{{ user?.name }}</div>
 
-    <loading v-if="loading" />
+    <loading-icon v-if="loading" />
     <ul v-else>
       <li
         v-for="user in users"

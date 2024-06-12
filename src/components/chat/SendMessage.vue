@@ -1,19 +1,29 @@
 <script lang="ts" setup>
+import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import { useChatStore } from '@/stores/ChatStore'
 import { useEchoStore } from '@/stores/EchoStore'
 import { storeToRefs } from 'pinia'
+import { ref, watch } from 'vue'
 
 const chatStore = useChatStore()
 const EchoStore = useEchoStore()
 
 const { selectedChat } = storeToRefs(chatStore)
 
-const sendMessage = () => {
-  if (selectedChat.value?.message) chatStore.sendMessage(selectedChat.value?.message)
+const message_input = ref<HTMLElement | null>(null)
+const sendMessage = async () => {
+  if (selectedChat.value?.message) await chatStore.sendMessage(selectedChat.value?.message)
   selectedChat.value.message = null
+  message_input.value?.focus()
 }
 
 const whisper = () => EchoStore.whisper()
+
+watch(
+  selectedChat.value,
+  () =>
+    !selectedChat.value.messageLoading && !!selectedChat.value.user && message_input.value?.focus()
+)
 </script>
 
 <template>
@@ -31,6 +41,8 @@ const whisper = () => EchoStore.whisper()
             'opacity-50 cursor-not-allowed': selectedChat.messageLoading || !selectedChat.user
           }"
           placeholder="Enter your message"
+          autocomplete="off"
+          ref="message_input"
         />
         <button
           :disabled="selectedChat.messageLoading || !selectedChat.user || !selectedChat.message"
@@ -38,7 +50,7 @@ const whisper = () => EchoStore.whisper()
           class="text-blue-500 py-2 px-3 rounded-md ml-2 hover:bg-blue-100 flex items-center"
           :class="{ 'opacity-50 cursor-not-allowed': !selectedChat.message }"
         >
-          <loading v-if="selectedChat.messageLoading" />
+          <loading-icon v-if="selectedChat.messageLoading" />
           <svg
             v-else
             xmlns="http://www.w3.org/2000/svg"

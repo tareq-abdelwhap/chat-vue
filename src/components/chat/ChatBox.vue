@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import Loading from '@/components/icons/Loading.vue'
+import LoadingIcon from '@/components/icons/LoadingIcon.vue'
 import Messages from '@/components/chat/Messages.vue'
 import SendMessage from '@/components/chat/SendMessage.vue'
 import { useChatStore } from '@/stores/ChatStore'
@@ -21,7 +21,7 @@ onMounted(() => EchoStore.listenToMessages())
       v-if="!selectedChat.user || selectedChat.loading"
       class="w-full px-5 py-5 flex justify-center items-center flex-grow overflow-auto border shadow-md rounded-lg clear-both border-gray-300"
     >
-      <loading v-if="selectedChat.loading" />
+      <loading-icon v-if="selectedChat.loading" />
       <span v-else>Select user to start chat</span>
     </div>
     <messages v-else />
