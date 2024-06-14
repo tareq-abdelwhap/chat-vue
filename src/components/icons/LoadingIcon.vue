@@ -4,17 +4,21 @@ defineProps({
     type: String,
     default: 'text-blue-500'
   },
-  classes: {
-    type: String,
-    default: ''
+  centerX: {
+    type: Boolean,
+    default: false
+  },
+  centerY: {
+    type: Boolean,
+    default: false
   }
 })
 </script>
 
 <template>
-  <div :class="classes">
+  <div :class="`flex ${color} ${centerX && 'justify-center'} ${centerY && 'h-full items-center'}`">
     <svg
-      :class="`animate-spin h-5 w-5 ${color}`"
+      :class="`animate-spin h-5 w-5`"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

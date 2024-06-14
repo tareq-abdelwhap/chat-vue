@@ -13,10 +13,17 @@ const EchoStore = useEchoStore()
 const { selectedChat } = storeToRefs(chatStore)
 
 onMounted(() => EchoStore.listenToMessages())
+
+defineProps({
+  span: {
+    type: String,
+    default: ''
+  }
+})
 </script>
 
 <template>
-  <div class="col-span-2 flex flex-col mx-1">
+  <div class="flex flex-col mx-1" :class="span">
     <div
       v-if="!selectedChat.user || selectedChat.loading"
       class="w-full px-5 py-5 flex justify-center items-center flex-grow overflow-auto border shadow-md rounded-lg clear-both border-gray-300"

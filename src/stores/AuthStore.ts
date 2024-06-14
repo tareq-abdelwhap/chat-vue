@@ -28,6 +28,7 @@ export const useAuthStore = defineStore('auth', () => {
   const setUser = async () => {
     try {
       const { data } = await api.get('/auth/user')
+
       user.value = data.user
       localStorage.setItem('user', JSON.stringify(data.user))
       EchoStore.onlineStatus()
@@ -39,8 +40,8 @@ export const useAuthStore = defineStore('auth', () => {
   const handleLogin = async (payload: User) => {
     try {
       loading.value = true
-      await csrf()
       errors.value = null
+      await csrf()
       await api.post('/auth/login', payload)
       await setUser()
     } catch (e: any) {

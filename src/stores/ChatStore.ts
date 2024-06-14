@@ -1,8 +1,7 @@
 import api from '@/utils/api'
-import { defineStore, storeToRefs } from 'pinia'
+import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from './AuthStore'
-import { useEchoStore } from './EchoStore'
 
 interface User {
   id?: number
@@ -11,6 +10,7 @@ interface User {
   selected?: boolean
   typing?: boolean
   online?: boolean
+  accepted?: boolean
 }
 
 export const useChatStore = defineStore('chat', () => {
@@ -26,6 +26,11 @@ export const useChatStore = defineStore('chat', () => {
     message?: string | null
   }>({ loading: false, user: null })
   const onlineUsers = ref<number[]>([])
+  const requestActionLoading = ref<{ [key: string | number]: boolean }>({})
+  const searchResults = ref({
+    users: [] as User[],
+    loading: false
+  })
 
   const getUsers = async () => {
     try {
@@ -69,14 +74,65 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
+  const requestAction = async (user: User, accepted: boolean | null) => {
+    try {
+      requestActionLoading.value[user.id as number] = true
+      await authStore.csrf()
+      await api.put(`/users/${user.id}`, { accepted })
+      if (accepted !== null) {
+        users.value = users.value.map((u: User) => {
+          if (u.id === user.id) u.accepted = accepted
+          return u
+        })
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      requestActionLoading.value[user.id as number] = false
+    }
+  }
+
+  const searchUsers = async (q) => {
+    try {
+      searchResults.value.loading = true
+      await authStore.csrf()
+      const { data } = await api.post('/users/search', {
+        searchQuery: q
+      })
+      searchResults.value.users = data.users
+    } catch (e) {
+      console.error(e)
+    } finally {
+      searchResults.value.loading = false
+    }
+  }
+
+  const addFriend = async (user: User) => {
+    try {
+      requestActionLoading.value[user.id as number] = true
+      await authStore.csrf()
+      await api.post(`/users/add`, { friend_id: user.id })
+      user.sent = true
+    } catch (e) {
+      console.error(e)
+    } finally {
+      requestActionLoading.value[user.id as number] = false
+    }
+  }
+
   return {
     users,
     loading,
     selectedChat,
     onlineUsers,
+    requestActionLoading,
+    searchResults,
 
     getUsers,
     selectUser,
-    sendMessage
+    sendMessage,
+    requestAction,
+    searchUsers,
+    addFriend
   }
 })

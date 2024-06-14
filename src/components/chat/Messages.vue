@@ -9,7 +9,7 @@ const authStore = useAuthStore()
 const chatStore = useChatStore()
 
 const { user } = storeToRefs(authStore)
-const { selectedChat } = storeToRefs(chatStore)
+const { selectedChat, onlineUsers } = storeToRefs(chatStore)
 
 const chatContainer = ref<HTMLElement | null>(null)
 const scrollToBottom = () => {
@@ -25,10 +25,10 @@ onMounted(() => nextTick(() => scrollToBottom()))
 
 <template>
   <div class="text-center text-xl py-3 sticky top-0 bg-white">
-    Chat with: {{ selectedChat.user?.name }}
+    Chat with:{{ selectedChat.user?.name }}
   </div>
   <ul
-    class="w-full px-5 h-[604px] pb-5 overflow-auto border shadow-md rounded-lg border-gray-300 flex flex-col"
+    class="w-full px-5 flex-grow pb-5 overflow-auto border shadow-md rounded-lg border-gray-300 flex flex-col"
     ref="chatContainer"
   >
     <div class="flex-grow"></div>

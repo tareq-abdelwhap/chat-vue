@@ -9,7 +9,7 @@ import { useRouter } from 'vue-router'
 
 const form = ref({
   email: 'test@test.com',
-  password: '12345678',
+  password: 'password',
   remember: false
 })
 

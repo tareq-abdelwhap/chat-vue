@@ -10,28 +10,35 @@ export const useEchoStore = defineStore('echo', () => {
   const timeOut = ref({})
 
   const onlineStatus = () => {
-    const { user } = storeToRefs(authStore)
+    const { user: authUser } = storeToRefs(authStore)
     const { users } = storeToRefs(chatStore)
 
-    if (user.value) {
+    if (authUser.value) {
       Echo.join('online-status')
         .here((users: Object[][]) => {
-          markUsersAsOnline(users.map((u) => u.id))
+          console.log('here', users)
+          markUsersAsOnline(users)
         })
         .joining((user) => {
-          markUsersAsOnline([user.id])
+          console.log('joining', user)
+          markUsersAsOnline(user)
         })
         .leaving((user) => {
-          markUsersAsOnline([user.id], false)
+          console.log('leaving', user)
+          markUsersAsOnline(user)
         })
-        .listen('UserOnlineStatus', () => {})
+        .listen('OnlineStatus', ({ user }) => {
+          console.log('listen', user)
+          const accepted = Object.keys(user).includes('accepted') ? user.accepted : true
+          if (user && authUser.value.id !== user.id) markUsersAsOnline(user, true, accepted)
+        })
         .listenForWhisper('typing', (res: any) => {
           users.value.map((u) => {
             if (u.id === res.user.id) {
-              user.value.typing = u.typing = true
+              authUser.value.typing = u.typing = true
               if (timeOut.value[u.id]) clearTimeout(timeOut.value[u.id])
               timeOut.value[u.id] = setTimeout(() => {
-                user.value.typing = u.typing = false
+                authUser.value.typing = u.typing = false
               }, 900)
             }
           })
@@ -39,12 +46,21 @@ export const useEchoStore = defineStore('echo', () => {
     }
   }
 
-  const markUsersAsOnline = (users: number[], online: boolean = true, force = false) => {
-    const { onlineUsers } = storeToRefs(chatStore)
+  const markUsersAsOnline = (
+    users: [] | Object,
+    online: boolean = true,
+    accepted: boolean | null = null
+  ) => {
+    const { onlineUsers, users: allUsers } = storeToRefs(chatStore)
+    if (Array.isArray(users)) {
+      onlineUsers.value = users.map((u) => u.id)
+    } else {
+      if (!allUsers.value.find((u) => users.id === u.id) && accepted !== null)
+        allUsers.value.push({ ...users, accepted })
 
-    if (force) onlineUsers.value = users
-    else if (online) onlineUsers.value = [...onlineUsers.value, ...users]
-    else onlineUsers.value = onlineUsers.value.filter((u) => !users.includes(u))
+      if (online) onlineUsers.value = [...onlineUsers.value, users.id]
+      else onlineUsers.value = onlineUsers.value.filter((u) => users.id !== u)
+    }
   }
 
   const listenToMessages = async () => {
@@ -58,10 +74,8 @@ export const useEchoStore = defineStore('echo', () => {
 
   const whisper = () => {
     const { user } = storeToRefs(authStore)
-
-    const channel = Echo.join(`online-status`)
     setTimeout(function () {
-      channel.whisper('typing', {
+      Echo.join('online-status').whisper('typing', {
         user: user.value,
         typing: true
       })
